@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { 
   Brain, 
   Sparkles, 
@@ -23,29 +23,28 @@ import {
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeFeature, setActiveFeature] = useState(0);
 
-  // Otimização do useEffect para evitar loops infinitos
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveFeature((prev) => (prev + 1) % 3);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+      setIsMenuOpen(false);
+    }
+  };
 
   const features = [
     {
-      icon: <Brain className="w-8 h-8" />,
+      icon: <Brain className="w-8 h-8 text-white" />,
       title: "IA Avançada",
       description: "Algoritmos de última geração para resultados excepcionais"
     },
     {
-      icon: <Zap className="w-8 h-8" />,
+      icon: <Zap className="w-8 h-8 text-white" />,
       title: "Velocidade Extrema",
       description: "Processamento em tempo real com performance otimizada"
     },
     {
-      icon: <Shield className="w-8 h-8" />,
+      icon: <Shield className="w-8 h-8 text-white" />,
       title: "Segurança Total",
       description: "Proteção de dados com criptografia de nível militar"
     }
@@ -108,39 +107,83 @@ export default function Home() {
             
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-300 hover:text-white transition-colors">Recursos</a>
-              <a href="#pricing" className="text-gray-300 hover:text-white transition-colors">Preços</a>
-              <a href="#legal" className="text-gray-300 hover:text-white transition-colors">Legal</a>
-              <a href="#contact" className="text-gray-300 hover:text-white transition-colors">Contato</a>
+              <button 
+                onClick={() => scrollToSection('features')} 
+                className="text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-md hover:bg-white/10"
+              >
+                Recursos
+              </button>
+              <button 
+                onClick={() => scrollToSection('pricing')} 
+                className="text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-md hover:bg-white/10"
+              >
+                Preços
+              </button>
+              <button 
+                onClick={() => scrollToSection('legal')} 
+                className="text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-md hover:bg-white/10"
+              >
+                Legal
+              </button>
+              <button 
+                onClick={() => scrollToSection('contact')} 
+                className="text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-md hover:bg-white/10"
+              >
+                Contato
+              </button>
               <button className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-6 py-2 rounded-full hover:scale-105 transition-transform">
                 Começar Agora
               </button>
             </div>
 
             {/* Mobile Menu Button */}
-            <button 
-              className="md:hidden text-white"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-black/90 backdrop-blur-lg">
-            <div className="px-2 pt-2 pb-3 space-y-1">
-              <a href="#features" className="block px-3 py-2 text-gray-300 hover:text-white">Recursos</a>
-              <a href="#pricing" className="block px-3 py-2 text-gray-300 hover:text-white">Preços</a>
-              <a href="#legal" className="block px-3 py-2 text-gray-300 hover:text-white">Legal</a>
-              <a href="#contact" className="block px-3 py-2 text-gray-300 hover:text-white">Contato</a>
-              <button className="w-full mt-2 bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-6 py-2 rounded-full">
-                Começar Agora
+            <div className="md:hidden">
+              <button 
+                className="text-white p-2 hover:bg-white/10 rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
+
+              {/* Mobile Menu */}
+              {isMenuOpen && (
+                <div className="absolute top-16 right-0 w-64 bg-black/95 backdrop-blur-lg border border-white/10 rounded-lg shadow-xl">
+                  <div className="p-4 space-y-2">
+                    <button 
+                      onClick={() => scrollToSection('features')} 
+                      className="block w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 transition-colors rounded-md"
+                    >
+                      Recursos
+                    </button>
+                    <button 
+                      onClick={() => scrollToSection('pricing')} 
+                      className="block w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 transition-colors rounded-md"
+                    >
+                      Preços
+                    </button>
+                    <button 
+                      onClick={() => scrollToSection('legal')} 
+                      className="block w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 transition-colors rounded-md"
+                    >
+                      Legal
+                    </button>
+                    <button 
+                      onClick={() => scrollToSection('contact')} 
+                      className="block w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 transition-colors rounded-md"
+                    >
+                      Contato
+                    </button>
+                    <div className="pt-2">
+                      <button className="w-full bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-6 py-3 rounded-full hover:scale-105 transition-transform">
+                        Começar Agora
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
       </nav>
 
       {/* Hero Section */}
@@ -174,21 +217,14 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Interactive Feature Cards */}
+          {/* Feature Cards */}
           <div className="grid md:grid-cols-3 gap-6 mt-16">
             {features.map((feature, index) => (
               <div
                 key={index}
-                className={`p-6 rounded-2xl backdrop-blur-sm border transition-all duration-500 cursor-pointer ${
-                  activeFeature === index
-                    ? 'bg-gradient-to-br from-cyan-500/20 to-purple-600/20 border-cyan-400/50 scale-105'
-                    : 'bg-white/5 border-white/10 hover:bg-white/10'
-                }`}
-                onMouseEnter={() => setActiveFeature(index)}
+                className="p-6 rounded-2xl backdrop-blur-sm border bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300"
               >
-                <div className={`inline-flex p-3 rounded-xl mb-4 ${
-                  activeFeature === index ? 'bg-gradient-to-r from-cyan-500 to-purple-600' : 'bg-white/10'
-                }`}>
+                <div className="inline-flex p-3 rounded-xl mb-4 bg-gradient-to-r from-cyan-500 to-purple-600">
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
@@ -211,12 +247,12 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              { icon: <Rocket className="w-6 h-6" />, title: "Deploy Instantâneo", desc: "Implemente soluções em segundos" },
-              { icon: <Users className="w-6 h-6" />, title: "Colaboração", desc: "Trabalhe em equipe em tempo real" },
-              { icon: <Globe className="w-6 h-6" />, title: "Global", desc: "Disponível em 50+ idiomas" },
-              { icon: <Lock className="w-6 h-6" />, title: "Privacidade", desc: "Seus dados sempre protegidos" },
-              { icon: <Star className="w-6 h-6" />, title: "Qualidade", desc: "99.9% de precisão garantida" },
-              { icon: <Zap className="w-6 h-6" />, title: "Performance", desc: "Respostas em milissegundos" }
+              { icon: <Rocket className="w-6 h-6 text-white" />, title: "Deploy Instantâneo", desc: "Implemente soluções em segundos" },
+              { icon: <Users className="w-6 h-6 text-white" />, title: "Colaboração", desc: "Trabalhe em equipe em tempo real" },
+              { icon: <Globe className="w-6 h-6 text-white" />, title: "Global", desc: "Disponível em 50+ idiomas" },
+              { icon: <Lock className="w-6 h-6 text-white" />, title: "Privacidade", desc: "Seus dados sempre protegidos" },
+              { icon: <Star className="w-6 h-6 text-white" />, title: "Qualidade", desc: "99.9% de precisão garantida" },
+              { icon: <Zap className="w-6 h-6 text-white" />, title: "Performance", desc: "Respostas em milissegundos" }
             ].map((item, index) => (
               <div key={index} className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105">
                 <div className="bg-gradient-to-r from-cyan-500 to-purple-600 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
@@ -293,10 +329,10 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: <FileText className="w-6 h-6" />, title: "Termos de Uso", desc: "Condições claras e justas" },
-              { icon: <Shield className="w-6 h-6" />, title: "Política de Privacidade", desc: "LGPD e GDPR compliant" },
-              { icon: <Lock className="w-6 h-6" />, title: "Segurança de Dados", desc: "Criptografia end-to-end" },
-              { icon: <Globe className="w-6 h-6" />, title: "Conformidade Global", desc: "Regulamentações internacionais" }
+              { icon: <FileText className="w-6 h-6 text-white" />, title: "Termos de Uso", desc: "Condições claras e justas" },
+              { icon: <Shield className="w-6 h-6 text-white" />, title: "Política de Privacidade", desc: "LGPD e GDPR compliant" },
+              { icon: <Lock className="w-6 h-6 text-white" />, title: "Segurança de Dados", desc: "Criptografia end-to-end" },
+              { icon: <Globe className="w-6 h-6 text-white" />, title: "Conformidade Global", desc: "Regulamentações internacionais" }
             ].map((item, index) => (
               <div key={index} className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300 text-center">
                 <div className="bg-gradient-to-r from-cyan-500 to-purple-600 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -380,7 +416,7 @@ export default function Home() {
               <button className="hover:text-white transition-colors">
                 Política de Privacidade
               </button>
-              <a href="#" className="hover:text-white transition-colors">Cookies</a>
+              <button className="hover:text-white transition-colors">Cookies</button>
             </div>
           </div>
           

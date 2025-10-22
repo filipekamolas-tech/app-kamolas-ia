@@ -3,10 +3,6 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 ## Getting Started
 
 First, run the development server:
-/pages
- ├── index.js        → Página inicial  "/"
- ├── sobre.js        → Página "Sobre"  "/sobre"
- ├── contactos.js    → Página "Contactos"  "/contactos"
 
 ```bash
 npm run dev
