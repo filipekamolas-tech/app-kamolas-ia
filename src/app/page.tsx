@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   Brain, 
   Sparkles, 
@@ -18,18 +18,98 @@ import {
   Lock,
   FileText,
   Mail,
-  Phone
+  Phone,
+  ChevronDown,
+  Play,
+  Settings,
+  BarChart3,
+  Edit3,
+  Save,
+  Trash2
 } from "lucide-react";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeFeature, setActiveFeature] = useState<string | null>(null);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState<string | null>(null);
+  const [editableContent, setEditableContent] = useState<{[key: string]: string}>({});
+  const dropdownRefs = useRef<{[key: string]: HTMLDivElement | null}>({});
+
+  // Fechar dropdowns ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      
+      // Verificar se o clique foi fora de todos os dropdowns
+      let clickedOutside = true;
+      Object.values(dropdownRefs.current).forEach(ref => {
+        if (ref && ref.contains(target)) {
+          clickedOutside = false;
+        }
+      });
+      
+      // Verificar se clicou em um trigger de dropdown
+      if (target.closest('.dropdown-trigger')) {
+        clickedOutside = false;
+      }
+      
+      if (clickedOutside) {
+        setActiveDropdown(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Fechar menu mobile ao redimensionar
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setIsMenuOpen(false);
+      setActiveDropdown(null);
     }
+  };
+
+  const toggleFeature = (featureId: string) => {
+    setActiveFeature(activeFeature === featureId ? null : featureId);
+  };
+
+  const toggleDropdown = (dropdownId: string, event?: React.MouseEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    console.log('Toggling dropdown:', dropdownId); // Debug
+    setActiveDropdown(activeDropdown === dropdownId ? null : dropdownId);
+  };
+
+  const startEdit = (contentId: string, currentContent: string) => {
+    setEditMode(contentId);
+    setEditableContent({...editableContent, [contentId]: currentContent});
+  };
+
+  const saveEdit = (contentId: string) => {
+    setEditMode(null);
+    alert(`Conteúdo "${contentId}" salvo com sucesso!`);
+  };
+
+  const cancelEdit = () => {
+    setEditMode(null);
+    setEditableContent({});
   };
 
   const features = [
@@ -47,6 +127,111 @@ export default function Home() {
       icon: <Shield className="w-8 h-8 text-white" />,
       title: "Segurança Total",
       description: "Proteção de dados com criptografia de nível militar"
+    }
+  ];
+
+  const detailedFeatures = [
+    { 
+      id: "deploy",
+      icon: <Rocket className="w-6 h-6 text-white" />, 
+      title: "Deploy Instantâneo", 
+      desc: "Implemente soluções em segundos",
+      details: {
+        subtitle: "Implementação Rápida e Eficiente",
+        features: [
+          "Deploy com um clique",
+          "Rollback automático em caso de erro",
+          "Integração com CI/CD",
+          "Monitoramento em tempo real",
+          "Escalabilidade automática"
+        ],
+        demo: "Ver demonstração do deploy"
+      }
+    },
+    { 
+      id: "collaboration",
+      icon: <Users className="w-6 h-6 text-white" />, 
+      title: "Colaboração", 
+      desc: "Trabalhe em equipe em tempo real",
+      details: {
+        subtitle: "Trabalho em Equipe Sincronizado",
+        features: [
+          "Edição colaborativa em tempo real",
+          "Chat integrado",
+          "Controle de versões",
+          "Permissões granulares",
+          "Histórico de alterações"
+        ],
+        demo: "Testar colaboração"
+      }
+    },
+    { 
+      id: "global",
+      icon: <Globe className="w-6 h-6 text-white" />, 
+      title: "Global", 
+      desc: "Disponível em 50+ idiomas",
+      details: {
+        subtitle: "Alcance Internacional",
+        features: [
+          "Tradução automática",
+          "Localização cultural",
+          "Suporte multi-timezone",
+          "Compliance regional",
+          "CDN global"
+        ],
+        demo: "Explorar idiomas"
+      }
+    },
+    { 
+      id: "privacy",
+      icon: <Lock className="w-6 h-6 text-white" />, 
+      title: "Privacidade", 
+      desc: "Seus dados sempre protegidos",
+      details: {
+        subtitle: "Segurança de Nível Empresarial",
+        features: [
+          "Criptografia end-to-end",
+          "Conformidade LGPD/GDPR",
+          "Auditoria de segurança",
+          "Backup automático",
+          "Zero-knowledge architecture"
+        ],
+        demo: "Ver certificações"
+      }
+    },
+    { 
+      id: "quality",
+      icon: <Star className="w-6 h-6 text-white" />, 
+      title: "Qualidade", 
+      desc: "99.9% de precisão garantida",
+      details: {
+        subtitle: "Excelência Comprovada",
+        features: [
+          "Algoritmos validados",
+          "Testes automatizados",
+          "Métricas de qualidade",
+          "Feedback contínuo",
+          "Melhoria constante"
+        ],
+        demo: "Ver métricas"
+      }
+    },
+    { 
+      id: "performance",
+      icon: <Zap className="w-6 h-6 text-white" />, 
+      title: "Performance", 
+      desc: "Respostas em milissegundos",
+      details: {
+        subtitle: "Velocidade Incomparável",
+        features: [
+          "Processamento paralelo",
+          "Cache inteligente",
+          "Otimização automática",
+          "Load balancing",
+          "Edge computing"
+        ],
+        demo: "Testar velocidade"
+      }
     }
   ];
 
@@ -92,6 +277,66 @@ export default function Home() {
     }
   ];
 
+  // Dropdown menu items com ações funcionais
+  const dropdownMenus = {
+    recursos: [
+      { 
+        name: "Deploy Instantâneo", 
+        action: () => { 
+          toggleFeature("deploy"); 
+          setTimeout(() => scrollToSection('features'), 100);
+        } 
+      },
+      { 
+        name: "Colaboração", 
+        action: () => { 
+          toggleFeature("collaboration"); 
+          setTimeout(() => scrollToSection('features'), 100);
+        } 
+      },
+      { 
+        name: "Global", 
+        action: () => { 
+          toggleFeature("global"); 
+          setTimeout(() => scrollToSection('features'), 100);
+        } 
+      },
+      { 
+        name: "Privacidade", 
+        action: () => { 
+          toggleFeature("privacy"); 
+          setTimeout(() => scrollToSection('features'), 100);
+        } 
+      },
+      { 
+        name: "Qualidade", 
+        action: () => { 
+          toggleFeature("quality"); 
+          setTimeout(() => scrollToSection('features'), 100);
+        } 
+      },
+      { 
+        name: "Performance", 
+        action: () => { 
+          toggleFeature("performance"); 
+          setTimeout(() => scrollToSection('features'), 100);
+        } 
+      }
+    ],
+    precos: [
+      { name: "Plano Starter", action: () => scrollToSection("pricing") },
+      { name: "Plano Professional", action: () => scrollToSection("pricing") },
+      { name: "Plano Enterprise", action: () => scrollToSection("pricing") },
+      { name: "Comparar Planos", action: () => scrollToSection("pricing") }
+    ],
+    legal: [
+      { name: "Termos de Uso", action: () => scrollToSection("legal") },
+      { name: "Política de Privacidade", action: () => scrollToSection("legal") },
+      { name: "Segurança de Dados", action: () => scrollToSection("legal") },
+      { name: "Conformidade Global", action: () => scrollToSection("legal") }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Navigation */}
@@ -107,31 +352,113 @@ export default function Home() {
             
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-8">
-              <button 
-                onClick={() => scrollToSection('features')} 
-                className="text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-md hover:bg-white/10"
-              >
-                Recursos
-              </button>
-              <button 
-                onClick={() => scrollToSection('pricing')} 
-                className="text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-md hover:bg-white/10"
-              >
-                Preços
-              </button>
-              <button 
-                onClick={() => scrollToSection('legal')} 
-                className="text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-md hover:bg-white/10"
-              >
-                Legal
-              </button>
+              {/* Recursos Dropdown */}
+              <div className="relative" ref={el => dropdownRefs.current['recursos'] = el}>
+                <button 
+                  onClick={(e) => toggleDropdown('recursos', e)}
+                  className="dropdown-trigger flex items-center space-x-1 text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                >
+                  <span>Recursos</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
+                    activeDropdown === 'recursos' ? 'rotate-180' : ''
+                  }`} />
+                </button>
+                
+                {activeDropdown === 'recursos' && (
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-black/95 backdrop-blur-lg border border-white/10 rounded-lg shadow-xl opacity-0 scale-95 animate-[fadeIn_0.2s_ease-out_forwards]">
+                    <div className="p-2">
+                      {dropdownMenus.recursos.map((item, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            console.log('Clicking menu item:', item.name); // Debug
+                            item.action();
+                            setActiveDropdown(null);
+                          }}
+                          className="block w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 transition-colors rounded-md focus:outline-none focus:bg-white/10"
+                        >
+                          {item.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Preços Dropdown */}
+              <div className="relative" ref={el => dropdownRefs.current['precos'] = el}>
+                <button 
+                  onClick={(e) => toggleDropdown('precos', e)}
+                  className="dropdown-trigger flex items-center space-x-1 text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                >
+                  <span>Preços</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
+                    activeDropdown === 'precos' ? 'rotate-180' : ''
+                  }`} />
+                </button>
+                
+                {activeDropdown === 'precos' && (
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-black/95 backdrop-blur-lg border border-white/10 rounded-lg shadow-xl opacity-0 scale-95 animate-[fadeIn_0.2s_ease-out_forwards]">
+                    <div className="p-2">
+                      {dropdownMenus.precos.map((item, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            item.action();
+                            setActiveDropdown(null);
+                          }}
+                          className="block w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 transition-colors rounded-md focus:outline-none focus:bg-white/10"
+                        >
+                          {item.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Legal Dropdown */}
+              <div className="relative" ref={el => dropdownRefs.current['legal'] = el}>
+                <button 
+                  onClick={(e) => toggleDropdown('legal', e)}
+                  className="dropdown-trigger flex items-center space-x-1 text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                >
+                  <span>Legal</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
+                    activeDropdown === 'legal' ? 'rotate-180' : ''
+                  }`} />
+                </button>
+                
+                {activeDropdown === 'legal' && (
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-black/95 backdrop-blur-lg border border-white/10 rounded-lg shadow-xl opacity-0 scale-95 animate-[fadeIn_0.2s_ease-out_forwards]">
+                    <div className="p-2">
+                      {dropdownMenus.legal.map((item, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            item.action();
+                            setActiveDropdown(null);
+                          }}
+                          className="block w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 transition-colors rounded-md focus:outline-none focus:bg-white/10"
+                        >
+                          {item.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <button 
                 onClick={() => scrollToSection('contact')} 
                 className="text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-md hover:bg-white/10"
               >
                 Contato
               </button>
-              <button className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-6 py-2 rounded-full hover:scale-105 transition-transform">
+              <button 
+                onClick={() => alert('Redirecionando para cadastro... Funcionalidade em desenvolvimento!')}
+                className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-6 py-2 rounded-full hover:scale-105 transition-transform"
+              >
                 Começar Agora
               </button>
             </div>
@@ -144,45 +471,126 @@ export default function Home() {
               >
                 {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
-
-              {/* Mobile Menu */}
-              {isMenuOpen && (
-                <div className="absolute top-16 right-0 w-64 bg-black/95 backdrop-blur-lg border border-white/10 rounded-lg shadow-xl">
-                  <div className="p-4 space-y-2">
-                    <button 
-                      onClick={() => scrollToSection('features')} 
-                      className="block w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 transition-colors rounded-md"
-                    >
-                      Recursos
-                    </button>
-                    <button 
-                      onClick={() => scrollToSection('pricing')} 
-                      className="block w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 transition-colors rounded-md"
-                    >
-                      Preços
-                    </button>
-                    <button 
-                      onClick={() => scrollToSection('legal')} 
-                      className="block w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 transition-colors rounded-md"
-                    >
-                      Legal
-                    </button>
-                    <button 
-                      onClick={() => scrollToSection('contact')} 
-                      className="block w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 transition-colors rounded-md"
-                    >
-                      Contato
-                    </button>
-                    <div className="pt-2">
-                      <button className="w-full bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-6 py-3 rounded-full hover:scale-105 transition-transform">
-                        Começar Agora
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
+
+          {/* Mobile Menu */}
+          {isMenuOpen && (
+            <div className="md:hidden absolute top-16 left-0 right-0 bg-black/95 backdrop-blur-lg border-b border-white/10 opacity-0 animate-[slideDown_0.3s_ease-out_forwards]">
+              <div className="p-4 space-y-2">
+                {/* Mobile Recursos */}
+                <div>
+                  <button 
+                    onClick={() => toggleDropdown('recursos-mobile')}
+                    className="flex items-center justify-between w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 transition-colors rounded-md"
+                  >
+                    <span>Recursos</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
+                      activeDropdown === 'recursos-mobile' ? 'rotate-180' : ''
+                    }`} />
+                  </button>
+                  {activeDropdown === 'recursos-mobile' && (
+                    <div className="ml-4 mt-2 space-y-1">
+                      {dropdownMenus.recursos.map((item, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            item.action();
+                            setActiveDropdown(null);
+                            setIsMenuOpen(false);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-gray-400 hover:text-white hover:bg-white/5 transition-colors rounded-md text-sm"
+                        >
+                          {item.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Mobile Preços */}
+                <div>
+                  <button 
+                    onClick={() => toggleDropdown('precos-mobile')}
+                    className="flex items-center justify-between w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 transition-colors rounded-md"
+                  >
+                    <span>Preços</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
+                      activeDropdown === 'precos-mobile' ? 'rotate-180' : ''
+                    }`} />
+                  </button>
+                  {activeDropdown === 'precos-mobile' && (
+                    <div className="ml-4 mt-2 space-y-1">
+                      {dropdownMenus.precos.map((item, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            item.action();
+                            setActiveDropdown(null);
+                            setIsMenuOpen(false);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-gray-400 hover:text-white hover:bg-white/5 transition-colors rounded-md text-sm"
+                        >
+                          {item.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Mobile Legal */}
+                <div>
+                  <button 
+                    onClick={() => toggleDropdown('legal-mobile')}
+                    className="flex items-center justify-between w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 transition-colors rounded-md"
+                  >
+                    <span>Legal</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
+                      activeDropdown === 'legal-mobile' ? 'rotate-180' : ''
+                    }`} />
+                  </button>
+                  {activeDropdown === 'legal-mobile' && (
+                    <div className="ml-4 mt-2 space-y-1">
+                      {dropdownMenus.legal.map((item, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            item.action();
+                            setActiveDropdown(null);
+                            setIsMenuOpen(false);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-gray-400 hover:text-white hover:bg-white/5 transition-colors rounded-md text-sm"
+                        >
+                          {item.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <button 
+                  onClick={() => {
+                    scrollToSection('contact');
+                    setIsMenuOpen(false);
+                  }} 
+                  className="block w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 transition-colors rounded-md"
+                >
+                  Contato
+                </button>
+                <div className="pt-2">
+                  <button 
+                    onClick={() => {
+                      alert('Redirecionando para cadastro... Funcionalidade em desenvolvimento!');
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-6 py-3 rounded-full hover:scale-105 transition-transform"
+                  >
+                    Começar Agora
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 
@@ -195,11 +603,49 @@ export default function Home() {
               <span className="text-sm text-gray-300">Nova Era da Inteligência Artificial</span>
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-              O Futuro da
-              <span className="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent"> IA </span>
-              é Agora
-            </h1>
+            <div className="relative">
+              {editMode === 'hero-title' ? (
+                <div className="space-y-4">
+                  <textarea
+                    value={editableContent['hero-title'] || ''}
+                    onChange={(e) => setEditableContent({...editableContent, 'hero-title': e.target.value})}
+                    className="w-full bg-black/50 text-white text-5xl md:text-7xl font-bold text-center border border-cyan-400 rounded-lg p-4 resize-none"
+                    rows={3}
+                  />
+                  <div className="flex justify-center space-x-4">
+                    <button
+                      onClick={() => saveEdit('hero-title')}
+                      className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-700 transition-colors"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>Salvar</span>
+                    </button>
+                    <button
+                      onClick={cancelEdit}
+                      className="bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-gray-700 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                      <span>Cancelar</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative group">
+                  <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+                    O Futuro da
+                    <span className="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent"> IA </span>
+                    é Agora
+                  </h1>
+                  <button
+                    onClick={() => startEdit('hero-title', 'O Futuro da IA é Agora')}
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-cyan-600 text-white p-2 rounded-lg hover:bg-cyan-700 transition-all duration-200"
+                    title="Editar título"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
             
             <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
               Kamolas.IA revoluciona a forma como você interage com inteligência artificial. 
@@ -207,11 +653,17 @@ export default function Home() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <button className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:scale-105 transition-transform flex items-center space-x-2">
+              <button 
+                onClick={() => alert('Teste gratuito iniciado! Redirecionando para dashboard...')}
+                className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:scale-105 transition-transform flex items-center space-x-2"
+              >
                 <span>Experimente Grátis</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
-              <button className="border border-white/20 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white/10 transition-colors">
+              <button 
+                onClick={() => alert('Abrindo demonstração interativa...')}
+                className="border border-white/20 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white/10 transition-colors"
+              >
                 Ver Demonstração
               </button>
             </div>
@@ -222,7 +674,8 @@ export default function Home() {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="p-6 rounded-2xl backdrop-blur-sm border bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300"
+                className="p-6 rounded-2xl backdrop-blur-sm border bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105 cursor-pointer"
+                onClick={() => alert(`Explorando: ${feature.title} - Abrindo painel detalhado...`)}
               >
                 <div className="inline-flex p-3 rounded-xl mb-4 bg-gradient-to-r from-cyan-500 to-purple-600">
                   {feature.icon}
@@ -246,20 +699,60 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              { icon: <Rocket className="w-6 h-6 text-white" />, title: "Deploy Instantâneo", desc: "Implemente soluções em segundos" },
-              { icon: <Users className="w-6 h-6 text-white" />, title: "Colaboração", desc: "Trabalhe em equipe em tempo real" },
-              { icon: <Globe className="w-6 h-6 text-white" />, title: "Global", desc: "Disponível em 50+ idiomas" },
-              { icon: <Lock className="w-6 h-6 text-white" />, title: "Privacidade", desc: "Seus dados sempre protegidos" },
-              { icon: <Star className="w-6 h-6 text-white" />, title: "Qualidade", desc: "99.9% de precisão garantida" },
-              { icon: <Zap className="w-6 h-6 text-white" />, title: "Performance", desc: "Respostas em milissegundos" }
-            ].map((item, index) => (
-              <div key={index} className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-                <div className="bg-gradient-to-r from-cyan-500 to-purple-600 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
-                  {item.icon}
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-2">{item.title}</h3>
-                <p className="text-gray-400">{item.desc}</p>
+            {detailedFeatures.map((item, index) => (
+              <div key={index} className="relative">
+                <button
+                  onClick={() => toggleFeature(item.id)}
+                  className="w-full p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105 text-left group"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="bg-gradient-to-r from-cyan-500 to-purple-600 w-12 h-12 rounded-xl flex items-center justify-center">
+                      {item.icon}
+                    </div>
+                    <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${
+                      activeFeature === item.id ? 'rotate-180' : ''
+                    }`} />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-2">{item.title}</h3>
+                  <p className="text-gray-400">{item.desc}</p>
+                </button>
+
+                {/* Expanded Details */}
+                {activeFeature === item.id && (
+                  <div className="absolute top-full left-0 right-0 z-10 mt-2 p-6 bg-black/90 backdrop-blur-lg rounded-2xl border border-cyan-400/30 shadow-2xl opacity-0 scale-95 animate-[fadeIn_0.3s_ease-out_forwards]">
+                    <h4 className="text-lg font-semibold text-white mb-4">{item.details.subtitle}</h4>
+                    <ul className="space-y-2 mb-6">
+                      {item.details.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-center space-x-3">
+                          <Check className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                          <span className="text-gray-300 text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="flex space-x-3">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          alert(`${item.details.demo} - Abrindo demonstração interativa...`);
+                        }}
+                        className="flex-1 bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:scale-105 transition-transform flex items-center justify-center space-x-2"
+                      >
+                        <Play className="w-4 h-4" />
+                        <span>{item.details.demo}</span>
+                      </button>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          alert(`Abrindo painel de configurações de ${item.title}...`);
+                        }}
+                        className="px-4 py-2 bg-white/10 text-white rounded-lg text-sm hover:bg-white/20 transition-colors flex items-center space-x-2"
+                      >
+                        <Settings className="w-4 h-4" />
+                        <span>Configurar</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -276,7 +769,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {plans.map((plan, index) => (
-              <div key={index} className={`relative p-8 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover:scale-105 ${
+              <div key={index} className={`relative p-8 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover:scale-105 cursor-pointer ${
                 plan.popular 
                   ? 'bg-gradient-to-br from-cyan-500/20 to-purple-600/20 border-cyan-400/50' 
                   : 'bg-white/5 border-white/10'
@@ -306,11 +799,14 @@ export default function Home() {
                   ))}
                 </ul>
 
-                <button className={`w-full py-3 rounded-full font-semibold transition-all duration-300 ${
-                  plan.popular
-                    ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white hover:scale-105'
-                    : 'bg-white/10 text-white hover:bg-white/20'
-                }`}>
+                <button 
+                  onClick={() => alert(`Plano ${plan.name} selecionado! Redirecionando para checkout...`)}
+                  className={`w-full py-3 rounded-full font-semibold transition-all duration-300 ${
+                    plan.popular
+                      ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white hover:scale-105'
+                      : 'bg-white/10 text-white hover:bg-white/20'
+                  }`}
+                >
                   Começar Agora
                 </button>
               </div>
@@ -334,7 +830,11 @@ export default function Home() {
               { icon: <Lock className="w-6 h-6 text-white" />, title: "Segurança de Dados", desc: "Criptografia end-to-end" },
               { icon: <Globe className="w-6 h-6 text-white" />, title: "Conformidade Global", desc: "Regulamentações internacionais" }
             ].map((item, index) => (
-              <div key={index} className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300 text-center">
+              <div 
+                key={index} 
+                className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300 text-center cursor-pointer hover:scale-105"
+                onClick={() => alert(`Abrindo documento: ${item.title}...`)}
+              >
                 <div className="bg-gradient-to-r from-cyan-500 to-purple-600 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4">
                   {item.icon}
                 </div>
@@ -374,24 +874,36 @@ export default function Home() {
           <p className="text-xl text-gray-400 mb-12">Pronto para revolucionar seu negócio com IA?</p>
           
           <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
+            <div 
+              className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300 cursor-pointer hover:scale-105"
+              onClick={() => alert('Abrindo cliente de email para: contato@kamolas.ia')}
+            >
               <Mail className="w-8 h-8 text-cyan-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">Email</h3>
               <p className="text-gray-400">contato@kamolas.ia</p>
             </div>
-            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
+            <div 
+              className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300 cursor-pointer hover:scale-105"
+              onClick={() => alert('Iniciando chamada para: +55 (11) 9999-9999')}
+            >
               <Phone className="w-8 h-8 text-cyan-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">Telefone</h3>
               <p className="text-gray-400">+55 (11) 9999-9999</p>
             </div>
-            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
+            <div 
+              className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300 cursor-pointer hover:scale-105"
+              onClick={() => alert('Abrindo chat de suporte 24/7...')}
+            >
               <Globe className="w-8 h-8 text-cyan-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">Suporte 24/7</h3>
               <p className="text-gray-400">Sempre disponível</p>
             </div>
           </div>
 
-          <button className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-12 py-4 rounded-full text-lg font-semibold hover:scale-105 transition-transform flex items-center space-x-2 mx-auto">
+          <button 
+            onClick={() => alert('Redirecionando para formulário de cadastro completo...')}
+            className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-12 py-4 rounded-full text-lg font-semibold hover:scale-105 transition-transform flex items-center space-x-2 mx-auto"
+          >
             <span>Começar Agora</span>
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -410,13 +922,24 @@ export default function Home() {
             </div>
             
             <div className="flex space-x-6 text-gray-400 text-sm">
-              <button className="hover:text-white transition-colors">
+              <button 
+                onClick={() => alert('Abrindo documento: Termos de Uso...')}
+                className="hover:text-white transition-colors"
+              >
                 Termos de Uso
               </button>
-              <button className="hover:text-white transition-colors">
+              <button 
+                onClick={() => alert('Abrindo documento: Política de Privacidade...')}
+                className="hover:text-white transition-colors"
+              >
                 Política de Privacidade
               </button>
-              <button className="hover:text-white transition-colors">Cookies</button>
+              <button 
+                onClick={() => alert('Abrindo configurações de cookies...')}
+                className="hover:text-white transition-colors"
+              >
+                Cookies
+              </button>
             </div>
           </div>
           
@@ -426,6 +949,31 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Custom CSS for animations */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
